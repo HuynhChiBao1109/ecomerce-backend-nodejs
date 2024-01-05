@@ -1,8 +1,9 @@
 'use strict';
 // single turn
 const mongoose = require('mongoose');
+const { db: { connectString } } = require('../configs/config.mongodb');
+const connectDB = `mongodb://${connectString}/shopDev`;
 
-const connectString = 'mongodb+srv://baohc110902:4OVcC4ZF9ND22oX1@shopdev.zjjv5ft.mongodb.net/';
 const { countConnect } = require('../helpers/check.connect');
 class Database {
     constructor() {
@@ -15,7 +16,7 @@ class Database {
             mongoose.set('debug', { color: true })
         }
 
-        mongoose.connect(connectString,
+        mongoose.connect(connectDB,
             {
                 maxPoolSize: 50
             }
