@@ -2,10 +2,10 @@
 
 const shopModel = require("../models/shop.model");
 const bcrypt = require('bcrypt');
-const crypto = require('node:crypto');
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
+const crypto = require('node:crypto');
 
 const RoleShop = {
     SHOP: 'SHOP',
@@ -39,20 +39,9 @@ class AccessService {
 
             if (newShop) {
                 // create privateKey, publicKey
-                // const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
-                //     modulusLength: 4096,
-                //     publicKeyEncoding: {
-                //         type: 'pkcs1',
-                //         format: 'pem'
-                //     },
-                //     privateKeyEncoding: {
-                //         type: 'pkcs1',
-                //         format: 'pem'
-                //     },
-                // })
 
-                const publicKey = crypto.getRandomValues(64).toString('hex');
-                const privateKey = crypto.getRandomValues(64).toString('hex');
+                const publicKey = crypto.randomBytes(64).toString('hex');
+                const privateKey = crypto.randomBytes(64).toString('hex');
 
                 console.log({ publicKey, privateKey });
 
@@ -94,6 +83,7 @@ class AccessService {
             }
 
         } catch (error) {
+            console.error(error);
             return {
                 code: 'xxx',
                 message: error.message,
