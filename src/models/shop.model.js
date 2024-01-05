@@ -1,12 +1,12 @@
 'use strict'
 
-const { model, Schema, mongoose } = require('mongoose');
+const { model, Schema } = require('mongoose');
 
 const DOCUMENT_NAME = 'Shop';
 const COLLECTION_NAME = 'Shops';
 
 
-var shopSchema = new mongoose.Schema({
+var shopSchema = new Schema({
     name: {
         type: String,
         trim: true,
