@@ -65,20 +65,18 @@ class AccessService {
             console.log('Created token sucess::', tokens)
 
             return {
-                code: 201,
-                metadata: {
-                    shop: getInfoData({
-                        field: ['_id', 'name', 'email'],
-                        object: newShop
-                    }),
-                    tokens
-                }
+
+                shop: getInfoData({
+                    field: ['_id', 'name', 'email'],
+                    object: newShop
+                }),
+                tokens
+
             }
         }
 
         return {
-            code: 200,
-            metadata: null
+            shop: null
         }
 
     }
