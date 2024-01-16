@@ -8,7 +8,8 @@ const crypto = require('node:crypto');
 const { BadRequestError } = require("../core/error.response");
 // service ///
 const KeyTokenService = require("./keyToken.service");
-const { findByEmail } = require("./shop.service");
+const { findShopByEmail } = require("./shop.service");
+const { match } = require("node:assert");
 
 const RoleShop = {
     SHOP: 'SHOP',
@@ -21,20 +22,19 @@ class AccessService {
 
     static login = async ({ email, password, refreshToken = null }) => {
         // step 1: check email exist in dbs
-        const foundShop = await findByEmail({ email });
-        if (!foundShop) throw BadRequestError('Shop is not registed');
+        const foundShop = await findShopByEmail({ email });
+        if (!foundShop) throw new BadRequestError('Shop is not registed');
         // step 2: match password
         const matchPass = bcrypt.compare(password, foundShop.password);
         if (!matchPass) throw BadRequestError('Password is not match');
+        console.log("MatchPass", matchPass)
         // step 3: create privateKey, publicKey
         const publicKey = crypto.randomBytes(64).toString('hex');
         const privateKey = crypto.randomBytes(64).toString('hex');
         // step 4: create token pair
+        console.log("Service foundShop", foundShop);
         const { _id: userId } = foundShop;
-        const tokens = await createTokenPair({
-            userId,
-            email
-        }, publicKey, privateKey);
+        const tokens = await createTokenPair({ userId, email }, publicKey, privateKey);
 
         await KeyTokenService.createKeyToken({
             refreshToken: tokens.refreshToken,
@@ -61,6 +61,7 @@ class AccessService {
         const hodelShop = await shopModel.findOne({ email }).lean();
         // return
         if (hodelShop) {
+            console.error('error: Shop already registerd');
             throw new BadRequestError('error: Shop already registerd')
         }
         // step 2 : create new shop
@@ -75,24 +76,31 @@ class AccessService {
 
         if (newShop) {
             // create privateKey, publicKey
-
-            const publicKey = crypto.randomBytes(64).toString('hex');
-            const privateKey = crypto.randomBytes(64).toString('hex');
+            console.log('newShop::', newShop);
+            // const publicKey = crypto.randomBytes(64).toString('hex');
+            // const privateKey = crypto.randomBytes(64).toString('hex');
+            const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+                modulusLength: 4096,
+                publicKeyEncoding: {
+                    type: 'spki',
+                    format: 'pem'
+                },
+                privateKeyEncoding: {
+                    type: 'pkcs8',
+                    format: 'pem',
+                }
+            });
 
             console.log({ publicKey, privateKey });
 
-            const keyStore = KeyTokenService.createKeyToken({
+            const keyStore = await KeyTokenService.createKeyToken({
                 userId: newShop._id,
-                publicKey,
-                privateKey
+                publicKey: publicKey,
+                privateKey: privateKey,
             })
 
             if (!keyStore) {
-                // throw new BadRequestError('error: publicKeyString error')
-                return {
-                    code: 'xxx',
-                    message: 'publicKeyString error'
-                };
+                throw new BadRequestError('error: publicKeyString error')
             }
 
             // create token pair
@@ -117,6 +125,12 @@ class AccessService {
             shop: null
         }
 
+    }
+
+    static logout = async ({ keyStore }) => {
+        const delKey = KeyTokenService.removeToken(keyStore._id);
+        console.log('delKey::', delKey);
+        return delKey
     }
 }
 

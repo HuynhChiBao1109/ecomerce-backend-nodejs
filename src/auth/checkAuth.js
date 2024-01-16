@@ -1,9 +1,11 @@
 'use strict'
 
+const { AuthenError } = require('../core/error.response');
 const { findById } = require('../services/apiKey.service');
 
 const HEADER = {
     API_KEY: 'x-api-key',
+    CLIENT_ID: 'x-client-id',
     AUTHORIZATION: 'authorization'
 }
 
@@ -12,19 +14,19 @@ const apiKey = async (req, res, next) => {
         const key = req.headers[HEADER.API_KEY]?.toString();
         if (!key) {
             return res.status(403).json({
-                message: 'Forbidden error'
-            });
+                message: 'missing api key'
+            })
         }
         // check objkey
         const objKey = await findById(key);
         if (!objKey) {
             return res.status(403).json({
-                message: 'Forbidden error'
-            });
+                message: 'invalid api key'
+            })
         }
         req.objKey = objKey;
+        console.log("Req objkey::", req.objKey)
         return next();
-
     } catch (error) {
 
     }
@@ -50,14 +52,8 @@ const permission = (permissions) => {
     }
 }
 
-const asyncHandler = fn => {
-    return (req, res, next) => {
-        fn(req, res, next).catch(next);
-    }
-}
-
 module.exports = {
     apiKey,
     permission,
-    asyncHandler
+
 }

@@ -32,7 +32,7 @@ var shopSchema = new Schema({
     },
     roles: {
         type: Array,
-        default: []
+        default: [],
     }
 }, {
     timestamps: true,
