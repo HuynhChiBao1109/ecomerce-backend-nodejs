@@ -18,10 +18,6 @@ const RoleShop = {
 
 class AccessService {
 
-    static handlerRefreshToken = async (refreshToken) => {
-
-    }
-
     static login = async ({ email, password, refreshToken = null }) => {
         // step 1: check email exist in dbs
         const foundShop = await shopModel.findOne({ email: email }).lean()
@@ -43,31 +39,25 @@ class AccessService {
         });
         // step 4: create token pair
         const tokens = await createTokenPair(foundShop, publicKey, privateKey);
-
         await KeyTokenService.createKeyToken({
             refreshToken: tokens.refreshToken,
             publicKey: publicKey,
             userId: foundShop._id
         })
-
+        // return 
         return {
-
             shop: getInfoData({
                 field: ['_id'],
                 object: foundShop
             }),
             tokens
-
         }
-
     }
 
 
     static signUp = async ({ name, email, password }) => {
         // step 1: check email exist
-
         const hodelShop = await shopModel.findOne({ email }).lean();
-        // return
         if (hodelShop) {
             console.error('error: Shop already registerd');
             throw new BadRequestError('error: Shop already registerd')
@@ -81,58 +71,9 @@ class AccessService {
             password: passwordHash,
             roles: [RoleShop.SHOP]
         });
-
-        if (newShop) {
-            // create privateKey, publicKey
-            console.log('newShop::', newShop);
-            // const publicKey = crypto.randomBytes(64).toString('hex');
-            // const privateKey = crypto.randomBytes(64).toString('hex');
-            const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-                modulusLength: 4096,
-                publicKeyEncoding: {
-                    type: 'spki',
-                    format: 'pem'
-                },
-                privateKeyEncoding: {
-                    type: 'pkcs8',
-                    format: 'pem',
-                }
-            });
-
-            console.log({ publicKey, privateKey });
-
-            const keyStore = await KeyTokenService.createKeyToken({
-                userId: newShop._id,
-                publicKey: publicKey,
-                privateKey: privateKey,
-            })
-
-            if (!keyStore) {
-                throw new BadRequestError('error: publicKeyString error')
-            }
-
-            // create token pair
-            const tokens = await createTokenPair({
-                userId: newShop._id,
-                email
-            }, publicKey, privateKey);
-            console.log('Created token sucess::', tokens)
-
-            return {
-
-                shop: getInfoData({
-                    field: ['_id', 'name', 'email'],
-                    object: newShop
-                }),
-                tokens
-
-            }
-        }
-
         return {
-            shop: null
+            shop: newShop
         }
-
     }
 
     static logout = async ({ keyStore }) => {
