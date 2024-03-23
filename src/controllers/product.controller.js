@@ -1,7 +1,7 @@
 'use strict'
 
-const { CREATED } = require('../core/sucess.response');
-const { createProduct } = require('../services/product.service');
+const { CREATED, Ok } = require('../core/sucess.response');
+const { createProduct, findAllDraftsForShop } = require('../services/product.service');
 
 class ProductController {
 
@@ -12,6 +12,15 @@ class ProductController {
                 ...req.body,
                 product_shop: req.user._id
             })
+        }).send(res);
+    }
+
+    findALlDraftsForShop = async (req, res, next) => {
+        new Ok({
+            message: 'Find all drafts for shop successfully',
+            metadata: await findAllDraftsForShop({
+                product_shop: req.user._id,
+            }),
         }).send(res);
     }
 }
