@@ -45,7 +45,7 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
     }
 }
 
-const authenticationV2 = asyncHandler(async (req, res, next) => {
+const authentication = asyncHandler(async (req, res, next) => {
     // check userId missing
     const userId = req.headers[HEADER.CLIENT_ID];
     if (!userId) throw new AuthenError('Missing userId');
@@ -86,5 +86,5 @@ const authenticationV2 = asyncHandler(async (req, res, next) => {
 
 module.exports = {
     createTokenPair,
-    authenticationV2
+    authentication
 }
