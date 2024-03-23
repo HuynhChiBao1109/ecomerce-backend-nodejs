@@ -1,23 +1,13 @@
 'use strict'
 
-const { Product, Clothing, Electronic, Furniture } = require('../models/product.model');
+const { clothingModel, electronicModel, furnitureModel, prudctModel } = require('../models/product.model');
+const { BadRequestError } = require('../core/error.response');
 
 class ProductFactory {
     static createProduct() {
 
     }
 }
-
-/**
- *  product_name: { type: String, required: true },
-    product_thumb: { type: String, required: true },
-    product_price: { type: Number, required: true },
-    product_description: String,
-    product_quantity: { type: Number, required: true },
-    product_type: { type: String, required: true, enum: ['Clothing', 'Electronics', 'Funiture'] },
-    product_shop: { type: Schema.Types.ObjectId, ref: 'Shop', required: true },
-    product_attributes: { type: Schema.Types.Mixed, require: true },
- */
 
 class Product {
     constructor(
@@ -36,5 +26,41 @@ class Product {
 
     async createProduct() {
         return await Product.create(this);
+    }
+}
+
+class Clothing extends Product {
+    async createProduct() {
+        const newClothing = await clothingModel.create(this.product_attributes);
+        if (!newClothing) throw new BadRequestError('Create clothing failed');
+
+        const newProduct = await super.createProduct();
+        if (!newProduct) throw new BadRequestError('Create product failed');
+
+        return newProduct;
+    }
+}
+
+class Electronic extends Product {
+    async createProduct() {
+        const newElectronic = await electronicModel.create(this.product_attributes);
+        if (!newElectronic) throw new BadRequestError('Create electronic failed');
+
+        const newProduct = await super.createProduct();
+        if (!newProduct) throw new BadRequestError('Create product failed');
+
+        return newProduct;
+    }
+}
+
+class Furniture extends Product {
+    async createProduct() {
+        const newFurniture = await furnitureModel.create(this.product_attributes);
+        if (!newFurniture) throw new BadRequestError('Create furniture failed');
+
+        const newProduct = await super.createProduct();
+        if (!newProduct) throw new BadRequestError('Create product failed');
+
+        return newProduct;
     }
 }
