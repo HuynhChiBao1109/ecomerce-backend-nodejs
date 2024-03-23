@@ -4,8 +4,18 @@ const { clothingModel, electronicModel, furnitureModel, prudctModel } = require(
 const { BadRequestError } = require('../core/error.response');
 
 class ProductFactory {
-    static createProduct() {
 
+    static productRegistry = {}
+
+    static registerProductType(type, classRef) {
+        ProductFactory.productRegistry[type] = classRef;
+    }
+
+    static createProduct(type, payload) {
+        const productClass = ProductFactory.productRegistry[type];
+        if (!productClass) throw new BadRequestError(`Invalid product type ${type}`);
+
+        return new productClass(payload).createProduct();
     }
 }
 
@@ -64,3 +74,9 @@ class Furniture extends Product {
         return newProduct;
     }
 }
+
+ProductFactory.registerProductType('Clothing', Clothing);
+ProductFactory.registerProductType('Electronics', Electronic);
+ProductFactory.registerProductType('Furniture', Furniture);
+
+module.exports = ProductFactory;
