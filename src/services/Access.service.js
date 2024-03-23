@@ -8,8 +8,6 @@ const crypto = require('node:crypto');
 const { BadRequestError } = require("../core/error.response");
 // service ///
 const KeyTokenService = require("./keyToken.service");
-const { findShopByEmail } = require("./shop.service");
-const { match } = require("node:assert");
 
 const RoleShop = {
     SHOP: 'SHOP',
@@ -20,26 +18,36 @@ const RoleShop = {
 
 class AccessService {
 
+    static handlerRefreshToken = async (refreshToken) => {
+
+    }
+
     static login = async ({ email, password, refreshToken = null }) => {
         // step 1: check email exist in dbs
-        const foundShop = await findShopByEmail({ email });
+        const foundShop = await shopModel.findOne({ email: email }).lean()
         if (!foundShop) throw new BadRequestError('Shop is not registed');
         // step 2: match password
         const matchPass = bcrypt.compare(password, foundShop.password);
         if (!matchPass) throw BadRequestError('Password is not match');
-        console.log("MatchPass", matchPass)
         // step 3: create privateKey, publicKey
-        const publicKey = crypto.randomBytes(64).toString('hex');
-        const privateKey = crypto.randomBytes(64).toString('hex');
+        const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+            modulusLength: 4096,
+            publicKeyEncoding: {
+                type: 'spki',
+                format: 'pem'
+            },
+            privateKeyEncoding: {
+                type: 'pkcs8',
+                format: 'pem',
+            }
+        });
         // step 4: create token pair
-        console.log("Service foundShop", foundShop);
-        const { _id: userId } = foundShop;
-        const tokens = await createTokenPair({ userId, email }, publicKey, privateKey);
+        const tokens = await createTokenPair(foundShop, publicKey, privateKey);
 
         await KeyTokenService.createKeyToken({
             refreshToken: tokens.refreshToken,
-            publicKey, privateKey,
-            userId
+            publicKey: publicKey,
+            userId: foundShop._id
         })
 
         return {
