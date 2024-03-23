@@ -1,6 +1,6 @@
 'use strict'
 
-const { clothingModel, electronicModel, furnitureModel, prudctModel } = require('../models/product.model');
+const { clothingModel, electronicModel, furnitureModel, productModel } = require('../models/product.model');
 const { BadRequestError } = require('../core/error.response');
 
 class ProductFactory {
@@ -35,7 +35,10 @@ class Product {
     }
 
     async createProduct() {
-        return await Product.create(this);
+        const newProduct = await productModel.create(this)
+        if (!newProduct) throw new BadRequestError('Create product failed');
+
+        return newProduct;
     }
 }
 

@@ -2,11 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { asyncHandler } = require('../helpers/asyncHandler');
 const { authentication } = require('../middlewares/authen.middleware');
+const ProductController = require('../controllers/product.controller');
 
 router.use(authentication);
 
-router.get('/', (req, res) => {
-    res.json({ message: 'Hello World' });
-})
+router.post('/', asyncHandler(ProductController.createNewProduct));
 
 module.exports = router;
