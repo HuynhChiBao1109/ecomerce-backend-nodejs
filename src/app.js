@@ -16,7 +16,7 @@ require('./dbs/init.mongodb');
 // checkOverload();
 
 // init route
-app.use('/', require('./routes'));
+app.use('/v1/api', require('./routes'));
 
 // handle error 
 app.use((req, res, next) => {

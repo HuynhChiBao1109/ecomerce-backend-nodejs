@@ -6,7 +6,6 @@ const { AuthenError } = require('../core/error.response');
 const { findByUserId } = require('../services/keyToken.service');
 
 const HEADER = {
-    API_KEY: 'x-api-key', // key save on apiKey dbs
     CLIENT_ID: 'x-client-id',
     AUTHORIZATION: 'authorization', // access token
     REFRESHTOKEN: 'refreshToken' // refresh token
