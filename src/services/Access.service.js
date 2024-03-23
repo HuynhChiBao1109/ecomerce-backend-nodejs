@@ -16,7 +16,7 @@ const RoleShop = {
     ADMIN: 'ADMIN'
 }
 
-class AccessService {
+class AuthenService {
 
     static login = async ({ email, password, refreshToken = null }) => {
         // step 1: check email exist in dbs
@@ -83,4 +83,4 @@ class AccessService {
     }
 }
 
-module.exports = AccessService;
+module.exports = AuthenService;
